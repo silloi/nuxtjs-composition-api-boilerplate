@@ -26,9 +26,40 @@
 </template>
 
 <script lang="ts">
-import Vue from 'vue'
+import {
+  defineComponent,
+  useContext,
+  ref,
+  useAsync,
+  useFetch,
+} from '@nuxtjs/composition-api'
 
-export default Vue.extend({})
+export default defineComponent({
+  setup() {
+    const { $axios } = useContext()
+
+    /** SSR API fetch */
+    const responseAsync = useAsync(async () => {
+      return await $axios.$get(
+        'https://pokeapi.co/api/v2/pokemon?limit=100&offset=200'
+      )
+    })
+
+    /** CSR API fetch */
+    const responseFetch = ref()
+    useFetch(async () => {
+      const data = await $axios.$get(
+        'https://pokeapi.co/api/v2/pokemon?limit=100&offset=200'
+      )
+      responseFetch.value = data
+    })
+
+    return {
+      responseAsync,
+      responseFetch,
+    }
+  },
+})
 </script>
 
 <style>
